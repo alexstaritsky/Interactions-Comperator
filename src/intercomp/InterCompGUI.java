@@ -1,20 +1,33 @@
+package intercomp;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author Alexander
  */
 public class InterCompGUI extends javax.swing.JFrame {
-
+    
+    // My own variable declaration
+    private InteractionsFile file;
+    
     /**
      * Creates new form InterCompGUI
      */
     public InterCompGUI() {
         initComponents();
+        addPathListener();
     }
 
     /**
@@ -39,25 +52,48 @@ public class InterCompGUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interactions Comperator");
+        setResizable(false);
 
         labelFile.setText("File:");
 
         buttonBrowse.setText("Browse");
+        buttonBrowse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonBrowseActionPerformed(evt);
+            }
+        });
 
         buttonOpen.setText("Open");
+        buttonOpen.setEnabled(false);
+        buttonOpen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonOpenActionPerformed(evt);
+            }
+        });
+
+        scrollSummary.setEnabled(false);
 
         textSummary.setEditable(false);
         textSummary.setColumns(20);
         textSummary.setRows(5);
+        textSummary.setEnabled(false);
         scrollSummary.setViewportView(textSummary);
 
         labelInteraction.setText("Select types of interaction:");
+        labelInteraction.setEnabled(false);
+
+        comboIntLeft.setEnabled(false);
+
+        comboIntRight.setEnabled(false);
 
         buttonExGenes.setText("Export Genes");
+        buttonExGenes.setEnabled(false);
 
         buttonExPubMed.setText("Export PubMed");
+        buttonExPubMed.setEnabled(false);
 
         panelVenn.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        panelVenn.setEnabled(false);
 
         javax.swing.GroupLayout panelVennLayout = new javax.swing.GroupLayout(panelVenn);
         panelVenn.setLayout(panelVennLayout);
@@ -75,26 +111,22 @@ public class InterCompGUI extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scrollSummary)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(scrollSummary)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(labelFile)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(fieldPath, javax.swing.GroupLayout.PREFERRED_SIZE, 610, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(buttonBrowse)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(buttonOpen, javax.swing.GroupLayout.DEFAULT_SIZE, 73, Short.MAX_VALUE))))
+                        .addComponent(labelFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(fieldPath, javax.swing.GroupLayout.PREFERRED_SIZE, 610, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(buttonBrowse)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(buttonOpen, javax.swing.GroupLayout.DEFAULT_SIZE, 73, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addComponent(comboIntLeft, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(comboIntRight, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap()
                         .addComponent(panelVenn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -125,7 +157,7 @@ public class InterCompGUI extends javax.swing.JFrame {
                     .addComponent(comboIntLeft, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 171, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 207, Short.MAX_VALUE)
                         .addComponent(buttonExGenes)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(buttonExPubMed)
@@ -138,6 +170,30 @@ public class InterCompGUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void buttonBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonBrowseActionPerformed
+        fieldPath.setText(browseFile());
+    }//GEN-LAST:event_buttonBrowseActionPerformed
+
+    private void buttonOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOpenActionPerformed
+        String path = fieldPath.getText();
+        if (!path.equals("")) {
+            try {
+                file = new InteractionsFile(path);
+                updateFields();
+            } catch (FileNotFoundException e) {
+                JOptionPane.showMessageDialog(null, "Specified file not found", "Error", 0);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "There was a problem reading the file", "Error", 0);
+            } catch (IndexOutOfBoundsException e) {
+                JOptionPane.showMessageDialog(null, "The specified file has not the correct format", "Error", 0);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Unreported error occured: " + e.getMessage(), "Error", 0);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No path specified!", "Error", 2);
+        }
+    }//GEN-LAST:event_buttonOpenActionPerformed
 
     /**
      * @param args the command line arguments
@@ -172,6 +228,60 @@ public class InterCompGUI extends javax.swing.JFrame {
                 new InterCompGUI().setVisible(true);
             }
         });
+    }
+    
+    private void addPathListener() {
+        fieldPath.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                checkTextField();
+            }
+            
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                checkTextField();
+            }
+            
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                checkTextField();
+            }
+            
+            public void checkTextField() {
+                if (fieldPath.getText().equals("")) {
+                    buttonOpen.setEnabled(false);
+                } else {
+                    buttonOpen.setEnabled(true);
+                }
+            }
+        });
+    }
+    
+    private String browseFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        //Makkelijker maken bij testen WEGHALEN!!!
+        fileChooser.setCurrentDirectory(new File("C:/Users/Alexander/Desktop/Bio-Informatica/Jaar_2/Blok_6/Tentamen informatica/(Test)data"));
+        fileChooser.setDialogTitle("Choose a file with interactions");
+        int reply = fileChooser.showOpenDialog(this);
+        if (reply == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            return selectedFile.getAbsolutePath();
+        } else {
+            return "";
+        }
+    }
+    
+    private void updateFields() {
+        for (String s : file.getTypes()) {
+            comboIntLeft.addItem(s);
+            comboIntRight.addItem(s);
+        }
+        textSummary.setText(file.getStatsText());
+        textSummary.setEnabled(true);
+        scrollSummary.setEnabled(true);
+        labelInteraction.setEnabled(true);
+        comboIntLeft.setEnabled(true);
+        comboIntRight.setEnabled(true);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

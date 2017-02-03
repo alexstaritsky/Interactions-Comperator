@@ -1,3 +1,5 @@
+package intercomp;
+
 /**
  *
  * @author Alexander
