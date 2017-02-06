@@ -1,7 +1,7 @@
 package intercomp;
 
 /**
- *
+ * Gene class for storing information about a gene in one object.
  * @author Alexander
  */
 public class Gene implements Comparable<Gene> {

@@ -1,5 +1,7 @@
 package intercomp;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -7,21 +9,20 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
- *
+ * Graphical user interface for comparing interactions in a file.
  * @author Alexander
  */
 public class InterCompGUI extends javax.swing.JFrame {
-    
+
     // My own variable declaration
+    public final boolean DEBUG = true;
     private InteractionsFile file;
-    
+    private InteractionComperator comparator;
+    private boolean endingSetup = true;
+
     /**
      * Creates new form InterCompGUI
      */
@@ -49,6 +50,7 @@ public class InterCompGUI extends javax.swing.JFrame {
         buttonExGenes = new javax.swing.JButton();
         buttonExPubMed = new javax.swing.JButton();
         panelVenn = new javax.swing.JPanel();
+        buttonCompare = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interactions Comperator");
@@ -88,9 +90,19 @@ public class InterCompGUI extends javax.swing.JFrame {
 
         buttonExGenes.setText("Export Genes");
         buttonExGenes.setEnabled(false);
+        buttonExGenes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonExGenesActionPerformed(evt);
+            }
+        });
 
         buttonExPubMed.setText("Export PubMed");
         buttonExPubMed.setEnabled(false);
+        buttonExPubMed.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonExPubMedActionPerformed(evt);
+            }
+        });
 
         panelVenn.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         panelVenn.setEnabled(false);
@@ -105,6 +117,14 @@ public class InterCompGUI extends javax.swing.JFrame {
             panelVennLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
+
+        buttonCompare.setText("Compare");
+        buttonCompare.setEnabled(false);
+        buttonCompare.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonCompareActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -130,8 +150,10 @@ public class InterCompGUI extends javax.swing.JFrame {
                         .addComponent(panelVenn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(buttonExPubMed, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(buttonExGenes, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(buttonExPubMed, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(buttonExGenes, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(buttonCompare, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addGap(341, 341, 341)
@@ -157,22 +179,27 @@ public class InterCompGUI extends javax.swing.JFrame {
                     .addComponent(comboIntLeft, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 207, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(panelVenn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(44, 44, 44)
+                        .addComponent(buttonCompare)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 138, Short.MAX_VALUE)
                         .addComponent(buttonExGenes)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(buttonExPubMed)
-                        .addGap(47, 47, 47))
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(panelVenn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())))
+                        .addGap(47, 47, 47))))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonBrowseActionPerformed
-        fieldPath.setText(browseFile());
+        String path = browseFile(0);
+        if (path != null) {
+            fieldPath.setText(path);
+        }
     }//GEN-LAST:event_buttonBrowseActionPerformed
 
     private void buttonOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOpenActionPerformed
@@ -194,6 +221,87 @@ public class InterCompGUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "No path specified!", "Error", 2);
         }
     }//GEN-LAST:event_buttonOpenActionPerformed
+
+    private void buttonCompareActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCompareActionPerformed
+        if (endingSetup) {
+            comparator = new InteractionComperator(((String) comboIntLeft.getSelectedItem()), ((String) comboIntRight.getSelectedItem()), file.getInteractions());
+            buttonExGenes.setEnabled(true);
+            buttonExPubMed.setEnabled(true);
+            endingSetup = false;
+            drawVennDiagram();
+        } else {
+            comparator.setTypeA(((String) comboIntLeft.getSelectedItem()));
+            comparator.setTypeB(((String) comboIntRight.getSelectedItem()));
+            comparator.setInteractions(file.getInteractions());
+            comparator.compare();
+            drawVennDiagram();
+        }
+    }//GEN-LAST:event_buttonCompareActionPerformed
+
+    private void buttonExGenesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExGenesActionPerformed
+        try {
+            String path = browseFile(1);
+            if (!path.endsWith(".txt")) {
+                path += ".txt";
+            }
+            File file = new File(path);
+            if (path != null & !file.exists() & !file.isDirectory()) {
+                comparator.exportGenes(path);
+                JOptionPane.showMessageDialog(null, "Successfully exported all genes!", "Success", 1);
+            } else if (file.exists() & !file.isDirectory()) {
+                int reply = JOptionPane.showConfirmDialog(null, String.format("Are you sure you want to overwrite '%s' with genes?", file.getName()), "Warning", 0);
+                if (reply == JOptionPane.YES_OPTION) {
+                    comparator.exportPubMed(path);
+                    JOptionPane.showMessageDialog(null, "Successfully exported all genes!", "Success", 1);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Incorrect type of file to save!", "Error", 0);
+            }
+        } catch (NullPointerException e) {
+            // Cancel or closing of dialog
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "Cannot find location to save to!", "Error", 0);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "There was a problem saving the file", "Error", 0);
+        } catch (NullExportException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Unreported error occured: " + e.getMessage(), "Error", 0);
+        }
+    }//GEN-LAST:event_buttonExGenesActionPerformed
+
+    private void buttonExPubMedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExPubMedActionPerformed
+        try {
+            String path = browseFile(2);
+            if (!path.endsWith(".txt")) {
+                path += ".txt";
+            }
+            File file = new File(path);
+            if (path != null & !file.exists() & !file.isDirectory()) {
+                comparator.exportPubMed(path);
+                JOptionPane.showMessageDialog(null, "Successfully exported all associated PubMed identifiers!", "Success", 1);
+            } else if (file.exists() & !file.isDirectory()) {
+                int reply = JOptionPane.showConfirmDialog(null, String.format("Are you sure you want to overwrite '%s' with PMID's?", file.getName()), "Warning", 0);
+                if (reply == JOptionPane.YES_OPTION) {
+                    comparator.exportPubMed(path);
+                    JOptionPane.showMessageDialog(null, "Successfully exported all associated PubMed identifiers!", "Success", 1);
+                }
+            } else {
+                System.out.println("Test");
+                JOptionPane.showMessageDialog(null, "Incorrect type of file to save!", "Error", 0);
+            }
+        } catch (NullPointerException e) {
+            // Cancel or closing of dialog
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "Cannot find location to save to!", "Error", 0);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "There was a problem saving the file", "Error", 0);
+        } catch (NullExportException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error", 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Unreported error occured: " + e.toString(), "Error", 0);
+        }
+    }//GEN-LAST:event_buttonExPubMedActionPerformed
 
     /**
      * @param args the command line arguments
@@ -229,24 +337,24 @@ public class InterCompGUI extends javax.swing.JFrame {
             }
         });
     }
-    
+
     private void addPathListener() {
         fieldPath.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 checkTextField();
             }
-            
+
             @Override
             public void removeUpdate(DocumentEvent e) {
                 checkTextField();
             }
-            
+
             @Override
             public void changedUpdate(DocumentEvent e) {
                 checkTextField();
             }
-            
+
             public void checkTextField() {
                 if (fieldPath.getText().equals("")) {
                     buttonOpen.setEnabled(false);
@@ -256,21 +364,40 @@ public class InterCompGUI extends javax.swing.JFrame {
             }
         });
     }
-    
-    private String browseFile() {
+
+    private String browseFile(int function) {
+        int reply = JFileChooser.UNDEFINED_CONDITION;
         JFileChooser fileChooser = new JFileChooser();
-        //Makkelijker maken bij testen WEGHALEN!!!
-        fileChooser.setCurrentDirectory(new File("C:/Users/Alexander/Desktop/Bio-Informatica/Jaar_2/Blok_6/Tentamen informatica/(Test)data"));
-        fileChooser.setDialogTitle("Choose a file with interactions");
-        int reply = fileChooser.showOpenDialog(this);
+        // Om makkelijker het bestand te openen
+        if (DEBUG) {
+            fileChooser.setCurrentDirectory(new File("C:/Users/Alexander/Desktop/Bio-Informatica/Jaar_2/Blok_6/Tentamen informatica/(Test)data"));
+        }
+        if (function == 0) {
+            fileChooser.setDialogTitle("Choose a file with interactions");
+            reply = fileChooser.showOpenDialog(this);
+        }
+        if (function == 1) {
+            fileChooser.setDialogTitle("Choose a location for exporting genes");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Tab-delimited text file (*.txt)", "txt"));
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setSelectedFile(new File("Genes"));
+            reply = fileChooser.showDialog(this, "Export");
+        }
+        if (function == 2) {
+            fileChooser.setDialogTitle("Choose a location for exporting PubMed identifiers");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Line separated identifiers (*.txt)", "txt"));
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.setSelectedFile(new File("PMIDs"));
+            reply = fileChooser.showDialog(this, "Export");
+        }
         if (reply == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             return selectedFile.getAbsolutePath();
         } else {
-            return "";
+            return null;
         }
     }
-    
+
     private void updateFields() {
         for (String s : file.getTypes()) {
             comboIntLeft.addItem(s);
@@ -282,10 +409,41 @@ public class InterCompGUI extends javax.swing.JFrame {
         labelInteraction.setEnabled(true);
         comboIntLeft.setEnabled(true);
         comboIntRight.setEnabled(true);
+        buttonCompare.setEnabled(true);
+        panelVenn.setEnabled(true);
+        panelVenn.setBackground(Color.WHITE);
+    }
+
+    private void drawVennDiagram() {
+        Graphics paper = panelVenn.getGraphics();
+        panelVenn.removeAll();
+        paper.setColor(Color.WHITE);
+        paper.fillRect(0, 0, panelVenn.getWidth(), panelVenn.getHeight());
+
+        char[] typeA = comparator.getTypeA().toCharArray();
+        char[] typeB = comparator.getTypeB().toCharArray();
+        char[] genesA = Integer.toString(comparator.getGenesA().size()).toCharArray();
+        char[] genesIntersection = Integer.toString(comparator.getGenesIntersection().size()).toCharArray();
+        char[] genesB = Integer.toString(comparator.getGenesB().size()).toCharArray();
+
+        int xUnit = panelVenn.getWidth() / 20;
+        int yUnit = panelVenn.getHeight() / 20;
+
+        paper.setColor(Color.BLUE);
+        paper.drawOval(xUnit * 2, panelVenn.getHeight() / 4, panelVenn.getWidth() / 2, panelVenn.getHeight() / 2);
+        paper.drawOval(xUnit * 8, panelVenn.getHeight() / 4, panelVenn.getWidth() / 2, panelVenn.getHeight() / 2);
+
+        paper.setColor(Color.BLACK);
+        paper.drawChars(typeA, 0, typeA.length, xUnit * 5, yUnit * 4);
+        paper.drawChars(typeB, 0, typeB.length, xUnit * 13, yUnit * 4);
+        paper.drawChars(genesA, 0, genesA.length, xUnit * 6, yUnit * 11);
+        paper.drawChars(genesIntersection, 0, genesIntersection.length, xUnit * 10, yUnit * 11);
+        paper.drawChars(genesB, 0, genesB.length, xUnit * 14, yUnit * 11);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonBrowse;
+    private javax.swing.JButton buttonCompare;
     private javax.swing.JButton buttonExGenes;
     private javax.swing.JButton buttonExPubMed;
     private javax.swing.JButton buttonOpen;

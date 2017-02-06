@@ -1,7 +1,7 @@
 package intercomp;
 
 /**
- *
+ * Interaction class to describe a interatiction between two genes.
  * @author Alexander
  */
 public class Interaction implements Comparable<Interaction> {
@@ -9,15 +9,15 @@ public class Interaction implements Comparable<Interaction> {
     private Gene geneA;
     private Gene geneB;
     private String pubmedID;
-    private String interaction;
+    private String type;
     private String lastUpdate;
     private String geneRIF;
 
-    public Interaction(Gene geneA, Gene geneB, String pubmedID, String interaction, String lastUpdate, String geneRIF) {
+    public Interaction(Gene geneA, Gene geneB, String pubmedID, String type, String lastUpdate, String geneRIF) {
         this.geneA = geneA;
         this.geneB = geneB;
         this.pubmedID = pubmedID;
-        this.interaction = interaction;
+        this.type = type;
         this.lastUpdate = lastUpdate;
         this.geneRIF = geneRIF;
     }
@@ -34,8 +34,8 @@ public class Interaction implements Comparable<Interaction> {
         return pubmedID;
     }
 
-    public String getInteraction() {
-        return interaction;
+    public String getType() {
+        return type;
     }
 
     public String getLastUpdate() {
@@ -58,8 +58,8 @@ public class Interaction implements Comparable<Interaction> {
         this.pubmedID = pubmedID;
     }
 
-    public void setInteraction(String interaction) {
-        this.interaction = interaction;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public void setLastUpdate(String lastUpdate) {
@@ -72,7 +72,7 @@ public class Interaction implements Comparable<Interaction> {
 
     @Override
     public int compareTo(Interaction other) {
-        return pubmedID.compareTo(other.getPubmedID());
+        return type.compareTo(other.getType());
     }
 
 }

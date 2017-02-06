@@ -47,8 +47,11 @@
                       <Component id="panelVenn" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="buttonExPubMed" alignment="1" min="-2" max="-2" attributes="0"/>
-                          <Component id="buttonExGenes" alignment="1" min="-2" pref="117" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="buttonExPubMed" alignment="1" min="-2" max="-2" attributes="0"/>
+                              <Component id="buttonExGenes" alignment="1" min="-2" pref="117" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="buttonCompare" alignment="1" min="-2" pref="117" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -82,16 +85,18 @@
               </Group>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace pref="207" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="panelVenn" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="44" max="-2" attributes="0"/>
+                      <Component id="buttonCompare" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="138" max="32767" attributes="0"/>
                       <Component id="buttonExGenes" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="buttonExPubMed" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="47" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" attributes="0">
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="panelVenn" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
           </Group>
@@ -176,12 +181,18 @@
         <Property name="text" type="java.lang.String" value="Export Genes"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonExGenesActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="buttonExPubMed">
       <Properties>
         <Property name="text" type="java.lang.String" value="Export PubMed"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonExPubMedActionPerformed"/>
+      </Events>
     </Component>
     <Container class="javax.swing.JPanel" name="panelVenn">
       <Properties>
@@ -206,5 +217,14 @@
         </DimensionLayout>
       </Layout>
     </Container>
+    <Component class="javax.swing.JButton" name="buttonCompare">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Compare"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonCompareActionPerformed"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>

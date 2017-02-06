@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
+ * Class representing a file with (multiple) gene(s) and the interactions between them.
  * @author Alexander
  */
 public class InteractionsFile {
@@ -79,7 +79,7 @@ public class InteractionsFile {
         for (Interaction i : interactions) {
             genesASet.add(i.getGeneA().getGeneID());
             genesBSet.add(i.getGeneB().getGeneID());
-            typesSet.add(i.getInteraction());
+            typesSet.add(i.getType());
         }
     }
 
