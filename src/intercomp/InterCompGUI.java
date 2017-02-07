@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
@@ -13,18 +15,20 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * Graphical user interface for comparing interactions in a file.
+ *
  * @author Alexander
  */
 public class InterCompGUI extends javax.swing.JFrame {
 
-    // My own variable declaration
-    public final boolean DEBUG = true;
+    // Non-GUI related variables (i.e. no buttons, textfields, components etc.)
     private InteractionsFile file;
     private InteractionComperator comparator;
     private boolean endingSetup = true;
 
     /**
-     * Creates new form InterCompGUI
+     * Creates new application instance InterCompGUI.
+     * <p>
+     * Initializes all the components for the application. Adds a listener to the path text field for checking its contents.
      */
     public InterCompGUI() {
         initComponents();
@@ -193,8 +197,16 @@ public class InterCompGUI extends javax.swing.JFrame {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Called when the browse button is pressed in the GUI.
+     * <p>
+     * Opens a open dialog to let the user choose a file and puts the absolute path of the file in the text field for path.
+     *
+     * @param evt The ActionEvent created when the browse button was pressed.
+     */
     private void buttonBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonBrowseActionPerformed
         String path = browseFile(0);
         if (path != null) {
@@ -202,6 +214,13 @@ public class InterCompGUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_buttonBrowseActionPerformed
 
+    /**
+     * Called when the open button is pressed in the GUI.
+     * <p>
+     * Reads the path specified in the path text field. Creates a new InteractionsFile instance for use in the application. Unlocks multiple fields in the program to work with the file.
+     *
+     * @param evt The ActionEvent created when the open button was pressed.
+     */
     private void buttonOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonOpenActionPerformed
         String path = fieldPath.getText();
         if (!path.equals("")) {
@@ -222,6 +241,13 @@ public class InterCompGUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_buttonOpenActionPerformed
 
+    /**
+     * Called when the compare button is pressed in the GUI.
+     * <p>
+     * Checks if it is the first time that a compare action is performed. If it is the first time, a new InteractionComparator instance is created with the current options selected in the GUI. The InteractionsComperator compares the data and displays the data in a Venn-diagram made in a JPanel. When it is not the first time, it will update the contents of the current InteractionComparator, compare the new data and draw a new Venn-diagram accordingly.
+     *
+     * @param evt The ActionEvent created when the compare button was pressed.
+     */
     private void buttonCompareActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCompareActionPerformed
         if (endingSetup) {
             comparator = new InteractionComperator(((String) comboIntLeft.getSelectedItem()), ((String) comboIntRight.getSelectedItem()), file.getInteractions());
@@ -238,6 +264,13 @@ public class InterCompGUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_buttonCompareActionPerformed
 
+    /**
+     * Called when the export genes button is pressed in the GUI.
+     * <p>
+     * Gives the user an export/save dialog to select a location to save genes. Checks if the path is correct, if the file already exists gives the user a confirm dialog to confirm that the file will be overwritten. Calls the export genes function in the comparator to save the genes at the requested location. Has exception handling and informs the user by message dialog if something is wrong.
+     *
+     * @param evt The ActionEvent created when the export genes button was pressed.
+     */
     private void buttonExGenesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExGenesActionPerformed
         try {
             String path = browseFile(1);
@@ -251,7 +284,7 @@ public class InterCompGUI extends javax.swing.JFrame {
             } else if (file.exists() & !file.isDirectory()) {
                 int reply = JOptionPane.showConfirmDialog(null, String.format("Are you sure you want to overwrite '%s' with genes?", file.getName()), "Warning", 0);
                 if (reply == JOptionPane.YES_OPTION) {
-                    comparator.exportPubMed(path);
+                    comparator.exportGenes(path);
                     JOptionPane.showMessageDialog(null, "Successfully exported all genes!", "Success", 1);
                 }
             } else {
@@ -270,6 +303,13 @@ public class InterCompGUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_buttonExGenesActionPerformed
 
+    /**
+     * Called when the export PubMed button is pressed in the GUI.
+     * <p>
+     * Gives the user an export/save dialog to select a location to save PubMed identifiers. Checks if the path is correct, if the file already exists gives the user a confirm dialog to confirm that the file will be overwritten. Calls the export genes function in the comparator to save the PubMed identifiers at the requested location. Has exception handling and informs the user by message dialog if something is wrong.
+     *
+     * @param evt The ActionEvent created when the export PubMed button was pressed.
+     */
     private void buttonExPubMedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExPubMedActionPerformed
         try {
             String path = browseFile(2);
@@ -304,7 +344,11 @@ public class InterCompGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_buttonExPubMedActionPerformed
 
     /**
-     * @param args the command line arguments
+     * The main function of the application.
+     * <p>
+     * Sets the 'Windows' look and feel of the program if it's installed. Creates a new instance of the GUI and makes it visible.
+     *
+     * @param args The command line arguments.
      */
     public static void main(String args[]) {
         /* Set the Windows look and feel */
@@ -338,6 +382,11 @@ public class InterCompGUI extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Adds a custom DocumentListener to the browse text field.
+     * <p>
+     * The DocumentListener calls checkTextField() which checks if the text field is empty or not. If it's empty the open button will be enabled, else it will be disabled.
+     */
     private void addPathListener() {
         fieldPath.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -365,13 +414,15 @@ public class InterCompGUI extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Pops a dialog in front of the user to select a path to a file to open or export to.
+     *
+     * @param function An integer to select what kind of file chooser to use. 0 is the open dialog, 1 is the export genes dialog and 2 is the export PubMed identifier dialog.
+     * @return A String which represents an absolute path to a file location, no matter if it exists or not.
+     */
     private String browseFile(int function) {
         int reply = JFileChooser.UNDEFINED_CONDITION;
         JFileChooser fileChooser = new JFileChooser();
-        // Om makkelijker het bestand te openen
-        if (DEBUG) {
-            fileChooser.setCurrentDirectory(new File("C:/Users/Alexander/Desktop/Bio-Informatica/Jaar_2/Blok_6/Tentamen informatica/(Test)data"));
-        }
         if (function == 0) {
             fileChooser.setDialogTitle("Choose a file with interactions");
             reply = fileChooser.showOpenDialog(this);
@@ -379,6 +430,7 @@ public class InterCompGUI extends javax.swing.JFrame {
         if (function == 1) {
             fileChooser.setDialogTitle("Choose a location for exporting genes");
             fileChooser.setFileFilter(new FileNameExtensionFilter("Tab-delimited text file (*.txt)", "txt"));
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setAcceptAllFileFilterUsed(false);
             fileChooser.setSelectedFile(new File("Genes"));
             reply = fileChooser.showDialog(this, "Export");
@@ -386,6 +438,7 @@ public class InterCompGUI extends javax.swing.JFrame {
         if (function == 2) {
             fileChooser.setDialogTitle("Choose a location for exporting PubMed identifiers");
             fileChooser.setFileFilter(new FileNameExtensionFilter("Line separated identifiers (*.txt)", "txt"));
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setAcceptAllFileFilterUsed(false);
             fileChooser.setSelectedFile(new File("PMIDs"));
             reply = fileChooser.showDialog(this, "Export");
@@ -398,8 +451,13 @@ public class InterCompGUI extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Adds sorted interaction types to the combo boxes and enables multiple GUI components that need to be enabled after opening a file.
+     */
     private void updateFields() {
-        for (String s : file.getTypes()) {
+        List<String> types = new ArrayList<>(file.getTypes());
+        types.sort(null);
+        for (String s : types) {
             comboIntLeft.addItem(s);
             comboIntRight.addItem(s);
         }
@@ -414,31 +472,32 @@ public class InterCompGUI extends javax.swing.JFrame {
         panelVenn.setBackground(Color.WHITE);
     }
 
+    /**
+     * Clears the current Venn-diagram and draws a new diagram based on the information in InteractionComperator 'comparator'.
+     */
     private void drawVennDiagram() {
         Graphics paper = panelVenn.getGraphics();
         panelVenn.removeAll();
         paper.setColor(Color.WHITE);
         paper.fillRect(0, 0, panelVenn.getWidth(), panelVenn.getHeight());
 
-        char[] typeA = comparator.getTypeA().toCharArray();
-        char[] typeB = comparator.getTypeB().toCharArray();
-        char[] genesA = Integer.toString(comparator.getGenesA().size()).toCharArray();
-        char[] genesIntersection = Integer.toString(comparator.getGenesIntersection().size()).toCharArray();
-        char[] genesB = Integer.toString(comparator.getGenesB().size()).toCharArray();
-
         int xUnit = panelVenn.getWidth() / 20;
         int yUnit = panelVenn.getHeight() / 20;
+
+        String countA = Integer.toString(comparator.getGenesA().size() - comparator.getGenesIntersection().size());
+        String countIntersection = Integer.toString(comparator.getGenesIntersection().size());
+        String countB = Integer.toString(comparator.getGenesB().size() - comparator.getGenesIntersection().size());
 
         paper.setColor(Color.BLUE);
         paper.drawOval(xUnit * 2, panelVenn.getHeight() / 4, panelVenn.getWidth() / 2, panelVenn.getHeight() / 2);
         paper.drawOval(xUnit * 8, panelVenn.getHeight() / 4, panelVenn.getWidth() / 2, panelVenn.getHeight() / 2);
 
         paper.setColor(Color.BLACK);
-        paper.drawChars(typeA, 0, typeA.length, xUnit * 5, yUnit * 4);
-        paper.drawChars(typeB, 0, typeB.length, xUnit * 13, yUnit * 4);
-        paper.drawChars(genesA, 0, genesA.length, xUnit * 6, yUnit * 11);
-        paper.drawChars(genesIntersection, 0, genesIntersection.length, xUnit * 10, yUnit * 11);
-        paper.drawChars(genesB, 0, genesB.length, xUnit * 14, yUnit * 11);
+        paper.drawString(comparator.getTypeA(), xUnit * 5, yUnit * 4);
+        paper.drawString(comparator.getTypeB(), xUnit * 13, yUnit * 4);
+        paper.drawString(countA, xUnit * 6, yUnit * 11);
+        paper.drawString(countIntersection, xUnit * 10, yUnit * 11);
+        paper.drawString(countB, xUnit * 14, yUnit * 11);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
